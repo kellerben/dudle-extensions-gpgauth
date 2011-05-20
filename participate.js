@@ -77,7 +77,7 @@ Poll.parseNaddHook(function (name, userinput, returnfunc) {
 	if (userinput.GPGsig) {
 		// FIXME: parse userinput.GPGsig
 		sig = {
-			keyid : "491a3d9",
+			keyid : "491a3d9c",
 			message : "{}",
 			name : name,
 			mail : "fix.me@example.org",
