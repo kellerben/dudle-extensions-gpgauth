@@ -19,21 +19,87 @@
 
 "use strict";
 
-Poll.parseNaddHook(function (name, userinput) {
-	var authimage, fingerprint, signame;
-	if (userinput.GPGsig) {
-		// FIXME: check signature
-		signame = "FIXME <fix.me@example.org>";
-		fingerprint = "DEAD BEEF 0000 CAFE BABE  C00L D00D 0000 BAAD FEED";
+GPGAuth.getPublicKey = function (keyID, successfunc, notfoundfunc) {
+	$.ajax({
+		url: GPGAuth.extDir + '/keyserver.cgi',
+		data: {
+			service: 'getPublicKey',
+			keyid: keyID
+		},
+		method: "get",
+		success: function (pubKey) {
+			// FIXME: parse the key before calling successfunc
+			successfunc(pubKey);
+		},
+		error: function () {
+			notfoundfunc();
+		}
+	});
+};
 
-		authimage = "<img";
-		authimage += " style='float: left'";
-		authimage += " class='GPGAuthSigned'";
-		authimage += " alt='" + _("Signed Vote") + "'";
-		authimage += " title='" + printf(_("e-mail: %1, fingerprint: %2"), [signame, fingerprint]) + "'";
-		authimage += " src='" + GPGAuth.extDir + "/img/signed.png'";
-		authimage += ">";
-		$("#" + name + "_tr td[class='name']").prepend(authimage);
+GPGAuth.getImage = function (sig) {
+	var ret = "", alt, img;
+	switch (sig.correct) {
+	case "yes":
+		alt = _("Signed Vote");
+		img = "signed";
+		break;
+	case "no":
+		alt = _("Broken Signature");
+		img = "signed_broken";
+		break;
+	case "not found":
+		alt = _("Public Key was not found");
+		img = "signed_unknown";
+		break;
+	default:
+		alert("wrong state:" + sig.correct);
+	}
+	if (!sig.correct) {
+		ret += "<span class='warning' title='" + _("This vote was tampered!") + "'>";
+	}
+	ret += "<img";
+	ret += " style='float: left'";
+	ret += " class='GPGAuthSigned'";
+	ret += " alt='" + alt + "'";
+	ret += " title='" + printf(_("e-mail: %1, fingerprint: %2"), [sig.mail, sig.fingerprint]) + "'";
+	ret += " src='" + GPGAuth.extDir + "/img/" + img + ".png'";
+	ret += ">";
+	ret += sig.name;
+	if (!sig.correct) {
+		ret += "</span>";
+	}
+	return ret;
+};
+
+Poll.parseNaddHook(function (name, userinput, returnfunc) {
+	var authimage, sig;
+	if (userinput.GPGsig) {
+		// FIXME: parse userinput.GPGsig
+		sig = {
+			keyid : "491a3d9",
+			message : "{}",
+			name : name,
+			mail : "fix.me@example.org",
+			fingerprint : "DEAD BEEF 0000 CAFE BABE  C00L D00D 0000 BAAD FEED"
+		};
+		GPGAuth.getPublicKey(sig.keyid, function (pubkey) {
+			// FIXME: check signature
+			sig.correct = (Math.random() > 0.5 ? "yes" : "no");
+
+			$.each(JSON.parse(sig.message), function (col, val) {
+				userinput[col] = val;
+			});
+
+			userinput.name = userinput.name.replace(name, GPGAuth.getImage(sig));
+			returnfunc();
+		}, function () { 
+			sig.correct = "not found"
+			userinput.name = userinput.name.replace(name, GPGAuth.getImage(sig));
+			returnfunc();
+		});
+	} else {
+		returnfunc();
 	}
 });
 
@@ -80,3 +146,9 @@ if (GPGAuth.enabled) {
 		}
 	});
 }
+
+//if (!Poll.submitIsBound) {
+//  Poll.submitHook(function (userinput) {
+//    alert(e);
+//  });
+//}
