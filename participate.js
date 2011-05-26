@@ -85,7 +85,7 @@ Poll.parseNaddHook(function (name, userinput, returnfunc) {
 		};
 		GPGAuth.getPublicKey(sig.keyid, function (pubkey) {
 			// FIXME: check signature
-			sig.correct = (Math.random() > 0.5 ? "yes" : "no");
+			sig.correct = "yes"; //(Math.random() > 0.5 ? "yes" : "no");
 
 			$.each(JSON.parse(sig.message), function (col, val) {
 				userinput[col] = val;
