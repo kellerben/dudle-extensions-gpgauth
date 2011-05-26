@@ -94,7 +94,7 @@ Poll.parseNaddHook(function (name, userinput, returnfunc) {
 			userinput.name = userinput.name.replace(name, GPGAuth.getImage(sig));
 			returnfunc();
 		}, function () { 
-			sig.correct = "not found"
+			sig.correct = "not found";
 			userinput.name = userinput.name.replace(name, GPGAuth.getImage(sig));
 			returnfunc();
 		});
@@ -103,7 +103,7 @@ Poll.parseNaddHook(function (name, userinput, returnfunc) {
 	}
 });
 
-GPGAuth.enabled = localStorage.GPGAuth_enable === "true";
+GPGAuth.enabled = (gfGetLocal("GPGAuth_enable") === "true");
 GPGAuth.handleUserInput = function (participantInput, submitfunc) {
 	if (GPGAuth.enabled) {
 		GPGAuth.goahead = function () {
