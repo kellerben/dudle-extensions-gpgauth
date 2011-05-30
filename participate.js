@@ -142,6 +142,9 @@ if (GPGAuth.enabled) {
 				// use replaceWith instead of val() to make it resistant to form.reset
 				$("#useGPG").replaceWith("<input type='checkbox' " + (GPGAuth.enabled ? "checked='checked' " : "") + "id='useGPG' />");
 			});
+			$("#polltable form").live("reset", function(){
+				$("#useGPG").replaceWith("<input type='checkbox' " + (GPGAuth.enabled ? "checked='checked' " : "") + "id='useGPG' />");
+			})
 			$("#useGPG").attr("checked", GPGAuth.enabled);
 		}
 	});
