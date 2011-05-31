@@ -64,12 +64,18 @@ GPGAuth.getImage = function (sig) {
 	ret += " alt='" + alt + "'";
 	ret += " title='" + printf(_("e-mail: %1, fingerprint: %2"), [sig.mail, sig.fingerprint]) + "'";
 	ret += " src='" + GPGAuth.extDir + "/img/" + img + ".png'";
-	ret += ">";
-	ret += sig.name;
+	ret += "/>";
+	ret += "<span id='" + gfHtmlID(escapeHtml(sig.name)) + "'>" + sig.name + "</span>";
 	if (!sig.correct) {
 		ret += "</span>";
 	}
 	return ret;
+};
+
+GPGAuth.replaceName = function (name, userinput, sig) {
+	var pname = $("<p>" + userinput.name + "</p>");
+	pname.find("#" + gfHtmlID(escapeHtml(name))).replaceWith(GPGAuth.getImage(sig));
+	userinput.name = pname.html();
 };
 
 Poll.parseNaddHook(function (name, userinput, returnfunc) {
@@ -86,16 +92,15 @@ Poll.parseNaddHook(function (name, userinput, returnfunc) {
 		GPGAuth.getPublicKey(sig.keyid, function (pubkey) {
 			// FIXME: check signature
 			sig.correct = "yes"; //(Math.random() > 0.5 ? "yes" : "no");
-
 			$.each(JSON.parse(sig.message), function (col, val) {
 				userinput[col] = val;
 			});
+			GPGAuth.replaceName(name, userinput, sig);
 
-			userinput.name = userinput.name.replace(name, GPGAuth.getImage(sig));
 			returnfunc();
 		}, function () { 
 			sig.correct = "not found";
-			userinput.name = userinput.name.replace(name, GPGAuth.getImage(sig));
+			GPGAuth.replaceName(name, userinput, sig);
 			returnfunc();
 		});
 	} else {
