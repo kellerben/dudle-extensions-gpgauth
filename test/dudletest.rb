@@ -14,13 +14,14 @@ module DudleTest
 	@@options.fast_setup = true
 	@@options.highlight = false
 	@@options.browser = "*custom /usr/bin/google-chrome --proxy-server=localhost:4444"
+	@@options.speedincrease = 100
 
 	OPTPARSE = OptionParser.new{|opts|
 		opts.on('--[no-]fast-setup', 'clone the repo for faster setup', "default: #{@@options.fast_setup}"){|bool|
 			@@options.fast_setup = bool
 		}
-		opts.on('-s', '--slow', 'make it slow (+1s)'){|bool|
-			@@options.speed += 500
+		opts.on('-s', '--slow', "make it slow (+#{@@options.speedincrease}ms)"){|bool|
+			@@options.speed += @@options.speedincrease
 		}
 		opts.on('-h','--highlight', 'Highlight located elements'){|bool|
 			@@options.highlight = bool

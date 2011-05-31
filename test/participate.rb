@@ -75,12 +75,10 @@ class ParticipateTest  < Test::Unit::TestCase
 	end
 
 
-	def vote(user, signed = true)
+	def vote(user)
 		vote_nosig(user)
-		if signed
-			sign
-			send_sig
-		end
+		sign
+		send_sig
 	end
 	def vote_nosig(user)
 		@s.type("add_participant_input", user.name)
@@ -89,6 +87,7 @@ class ParticipateTest  < Test::Unit::TestCase
 		}
 
 		@s.click("savebutton")
+		wait_for_ajax
 	end
 	def sign
 		signText = @s.value("signText")
@@ -101,7 +100,6 @@ class ParticipateTest  < Test::Unit::TestCase
 		File.delete("#{tmpfile}.asc")
 	end
 	def send_sig
-		sign
 		@s.click("//input[@value='Save']")
 		wait_for_ajax
 	end
@@ -137,17 +135,17 @@ class ParticipateTest  < Test::Unit::TestCase
 			assert_equal(sum.to_s, @s.text("//tr[@id='summary']//td[#{index+2}]"), "Index #{index} was wrong")
 		}
 	end
-	def enable_sig
+	def set_sig(check)
 		l = @s.location
 		@s.open("/customize.cgi")
-		@s.click("useGPG") unless @s.checked?("useGPG")
+		@s.click("useGPG") unless @s.checked?("useGPG") == check
 		@s.open(l)
 		wait_for_ajax
 	end
 #   def test_symInconsistent
 	#   FIXME: does not work yet
 #     setup_poll_sym
-#     enable_sig
+#     set_sig(true)
 #     vote_nosig(A)
 #     sign
 #     signTextA = @s.value("signText")
@@ -157,33 +155,69 @@ class ParticipateTest  < Test::Unit::TestCase
 #     send_sig
 #     assert_voteResult([A])
 #   end
+	def test_checkbox
+		setup_poll_sym
+		set_sig(false)
+		assert(!@s.text?("Sign Vote"))
+		set_sig(true)
+		assert(@s.text?("Sign Vote"))
+	end
+	def assert_signed(user)
+		# FIXME: more tests!
+		assert(@s.element?("//tr[@id='#{user.name}_tr']//img[@class='GPGAuthSigned']"))
+	end
+	def assert_notsigned(user)
+		assert(!@s.element?("//tr[@id='#{user.name}_tr']//img[@class='GPGAuthSigned']"))
+	end
 	def test_symCheckbox
 		setup_poll_sym
-		enable_sig
-		assert(@s.text?("Sign Vote"))
+		set_sig(true)
 		assert("Next",@s.value("savebutton"))
 		vote(A)
-		@s.visible?("//img[@class='GPGAuthSigned']")
+		assert_signed(A)
 		assert_voteResult([A])
 
 		assert(@s.checked?("useGPG"))
 
+		@s.click("useGPG")
+		assert(!@s.checked?("useGPG"))
 		reload
-		@s.visible?("//img[@class='GPGAuthSigned']")
+		assert(@s.checked?("useGPG"))
+		assert_signed(A)
 		assert_voteResult([A])
 
 		@s.click("useGPG")
+		assert(!@s.checked?("useGPG"))
 		assert_equal("Save",@s.value("savebutton"))
 
-		vote(B, false)
+		vote_nosig(B)
+		assert_voteResult([A,B])
 		assert(!@s.checked?("useGPG"))
+		reload
+		assert_voteResult([A,B])
 
-		@s.click("useGPG")
 		vote(D)
 		vote(C)
 
 		assert(@s.checked?("useGPG"))
 		assert_voteResult([A,B,C,D])
+
+		reload
+		assert(@s.checked?("useGPG"))
+		assert_voteResult([A,B,C,D])
+	end
+	def test_symChange
+		setup_poll_sym
+		set_sig(false)
+		# nosig -> sig
+		vote_nosig(A)
+		assert_notsigned(A)
+		set_sig(true)
+		@s.click("//a[@title='Edit User #{A.name} ...']")
+		@s.click("savebutton")
+		sign
+		send_sig
+		assert_signed(A)
 	end
 #   def test_asym
 		# FIXME: unimplemented
