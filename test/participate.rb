@@ -206,10 +206,19 @@ class ParticipateTest  < Test::Unit::TestCase
 		assert(@s.checked?("useGPG"))
 		assert_voteResult([A,B,C,D])
 	end
-	def test_symChange
+	def test_symChangeSig2Nosig
+		setup_poll_sym
+		set_sig(true)
+		vote(A)
+		assert_signed(A)
+		set_sig(false)
+		@s.click("//a[@title='Edit User #{A.name} ...']")
+		@s.click("savebutton")
+		assert_notsigned(A)
+	end
+	def test_symChangeNosig2Sig
 		setup_poll_sym
 		set_sig(false)
-		# nosig -> sig
 		vote_nosig(A)
 		assert_notsigned(A)
 		set_sig(true)
