@@ -65,7 +65,9 @@ module DudleTest
 
 			@s.start_new_browser_session
 			@s.delete_all_visible_cookies
+			@s.open("/")
 			@s.create_cookie("lang=en; path=/;")
+			@s.run_script("localStorage.clear()")
 
 			@pollid = rand(999999999)
 
