@@ -14,7 +14,7 @@ module DudleTest
 	@@options.fast_setup = true
 	@@options.highlight = false
 	@@options.browser = "*custom /usr/bin/google-chrome --proxy-server=localhost:4444"
-	@@options.speedincrease = 100
+	@@options.speedincrease = 500
 
 	OPTPARSE = OptionParser.new{|opts|
 		opts.on('--[no-]fast-setup', 'clone the repo for faster setup', "default: #{@@options.fast_setup}"){|bool|
