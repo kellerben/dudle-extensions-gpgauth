@@ -28,8 +28,7 @@ GPGAuth.getPublicKey = function (keyID, successfunc, notfoundfunc) {
 		},
 		method: "get",
 		success: function (pubKey) {
-			// FIXME: parse the key before calling successfunc
-			successfunc(pubKey);
+			successfunc(new PublicKey(pubKey)); // FIXME: adopt this
 		},
 		error: function () {
 			notfoundfunc();
@@ -37,69 +36,51 @@ GPGAuth.getPublicKey = function (keyID, successfunc, notfoundfunc) {
 	});
 };
 
-GPGAuth.getImage = function (sig) {
-	var ret = "", alt, img;
-	switch (sig.correct) {
-	case "yes":
-		alt = _("Signed Vote");
-		img = "signed";
-		break;
-	case "no":
-		alt = _("Broken Signature");
-		img = "signed_broken";
-		break;
-	case "not found":
+GPGAuth.replaceName = function (name, userinput, sig, key) {
+	var pname = $("<p>" + userinput.name + "</p>"),
+	 newname = "", alt, img;
+	if (key) {
+		if (sig.correct) {
+			alt = _("Signed Vote");
+			img = "signed";
+		} else {
+			alt = _("Broken Signature");
+			img = "signed_broken";
+			newname += "<span class='warning' style='text-decoration: line-through' title='" + _("This vote was tampered!") + "'>";
+		}
+	} else {
 		alt = _("Public Key was not found");
 		img = "signed_unknown";
-		break;
-	default:
-		alert("wrong state:" + sig.correct);
+		key = {name: "unknown", mail: "unknown", fingerprint: "unknown"};
 	}
+	newname += "<img";
+	newname += " style='float: left'";
+	newname += " class='GPGAuthSigned'";
+	newname += " alt='" + alt + "'";
+	newname += " title='" + escapeHtml(key.name) + " " + printf(_("e-mail: %1, fingerprint: %2"), [key.mail, key.fingerprint]) + "'";
+	newname += " src='" + GPGAuth.extDir + "/img/" + img + ".png'";
+	newname += "/>";
+	newname += "<span id='" + gfHtmlID(escapeHtml(name)) + "'>" + name + "</span>";
 	if (!sig.correct) {
-		ret += "<span class='warning' title='" + _("This vote was tampered!") + "'>";
+		newname += "</span>";
 	}
-	ret += "<img";
-	ret += " style='float: left'";
-	ret += " class='GPGAuthSigned'";
-	ret += " alt='" + alt + "'";
-	ret += " title='" + printf(_("e-mail: %1, fingerprint: %2"), [sig.mail, sig.fingerprint]) + "'";
-	ret += " src='" + GPGAuth.extDir + "/img/" + img + ".png'";
-	ret += "/>";
-	ret += "<span id='" + gfHtmlID(escapeHtml(sig.name)) + "'>" + sig.name + "</span>";
-	if (!sig.correct) {
-		ret += "</span>";
-	}
-	return ret;
-};
-
-GPGAuth.replaceName = function (name, userinput, sig) {
-	var pname = $("<p>" + userinput.name + "</p>");
-	pname.find("#" + gfHtmlID(escapeHtml(name))).replaceWith(GPGAuth.getImage(sig));
+	pname.find("#" + gfHtmlID(escapeHtml(name))).replaceWith(newname);
 	userinput.name = pname.html();
 };
 
 Poll.parseNaddHook(function (name, userinput, returnfunc) {
 	var authimage, sig;
 	if (userinput.GPGsig) {
-		// FIXME: parse userinput.GPGsig
-		sig = {
-			keyid : "491a3d9c",
-			message : "{}",
-			name : name,
-			mail : "fix.me@example.org",
-			fingerprint : "DEAD BEEF 0000 CAFE BABE  C00L D00D 0000 BAAD FEED"
-		};
+		sig = new SignedMessage(userinput.GPGsig); // FIXME: adopt this
 		GPGAuth.getPublicKey(sig.keyid, function (pubkey) {
-			// FIXME: check signature
-			sig.correct = "yes"; //(Math.random() > 0.5 ? "yes" : "no");
+			sig.check(pubkey); //FIXME: adopt this
 			$.each(JSON.parse(sig.message), function (col, val) {
 				userinput[col] = val;
 			});
-			GPGAuth.replaceName(name, userinput, sig);
+			GPGAuth.replaceName(name, userinput, sig, pubkey);
 
 			returnfunc();
 		}, function () { 
-			sig.correct = "not found";
 			GPGAuth.replaceName(name, userinput, sig);
 			returnfunc();
 		});
