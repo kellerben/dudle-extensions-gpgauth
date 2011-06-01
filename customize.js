@@ -19,14 +19,16 @@
 
 "use strict";
 
-var usegpg = "<tr>";
-usegpg += "<td><label for='useGPG'>" + _("Sign votes using PGP/GPG:") + "</label></td>";
-usegpg += "<td class='settingstable'><input type='checkbox' id='useGPG' /></td>";
-usegpg += "</tr>";
-$("#usernamesetting").before(usegpg);
-$("#useGPG").click(function () {
-	localStorage.GPGAuth_enable = $("#useGPG").attr("checked");
-});
-$("#useGPG").attr("checked", localStorage.GPGAuth_enable === "true");
+if (gfHasLocalStorage) {
 
+	var usegpg = "<h3>" + _("Security") + "</h3>";
+	usegpg += "<label for='useGPG'>" + _("Sign votes using PGP/GPG:") + "</label>";
+	usegpg += "<input type='checkbox' id='useGPG' />";
+	$("#config_user").after(usegpg);
+	$("#useGPG").click(function () {
+		localStorage.GPGAuth_enable = $("#useGPG").attr("checked");
+	});
+	$("#useGPG").attr("checked", localStorage.GPGAuth_enable === "true");
+
+}
 
