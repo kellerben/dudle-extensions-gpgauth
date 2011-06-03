@@ -4,22 +4,32 @@ NO    = "c_no___"
 MAYBE = "b_maybe"
 
 A = OpenStruct.new(
+	:gpgname => "Benjamin Kellermann",
 	:name => "Alice",
 	:vote => [NO,YES,MAYBE]
 )
+A2 = OpenStruct.new(
+	:gpgname => "Benjamin Kellermann",
+	:name => "Alice",
+	:vote => [YES,NO,MAYBE]
+)
 B = OpenStruct.new(
+	:gpgname => "Benjamin Kellermann",
 	:name => "Bob",
 	:vote => [YES,YES,NO]
 )
 C = OpenStruct.new(
+	:gpgname => "Benjamin Kellermann",
 	:name => "Carol",
 	:vote => [YES,NO,YES]
 )
 D = OpenStruct.new(
+	:gpgname => "Benjamin Kellermann",
 	:name => "Dave",
 	:vote => [YES,YES,YES]
 )
 M = OpenStruct.new(
+	:gpgname => "Benjamin Kellermann",
 	:name => "Mallory",
 	:vote => [MAYBE,NO,YES]
 )
@@ -93,7 +103,7 @@ class ParticipateTest  < Test::Unit::TestCase
 		signText = @s.value("signText")
 		tmpfile = "/tmp/participatetest.#{rand(9999)}"
 		File.open(tmpfile,"w"){|f| f << signText }
-		`gpg -o #{tmpfile}.asc --clearsign #{tmpfile}`
+		`gpg --no-tty -o #{tmpfile}.asc --clearsign #{tmpfile}`
 		signed = File.open("#{tmpfile}.asc","r").read
 		@s.type("signText",signed)
 		File.delete(tmpfile)
@@ -164,7 +174,7 @@ class ParticipateTest  < Test::Unit::TestCase
 	end
 	def assert_signed(user)
 		# FIXME: more tests!
-		assert(@s.element?("//tr[@id='#{user.name}_tr']//img[@class='GPGAuthSigned']"))
+		assert(@s.element?("//tr[@id='#{user.gpgname.gsub(" ","_")}_tr']//img[@class='GPGAuthSigned']"))
 	end
 	def assert_notsigned(user)
 		assert(!@s.element?("//tr[@id='#{user.name}_tr']//img[@class='GPGAuthSigned']"))
@@ -211,10 +221,20 @@ class ParticipateTest  < Test::Unit::TestCase
 		set_sig(true)
 		vote(A)
 		assert_signed(A)
-		@s.click("//a[@title='Edit User #{A.name} ...']")
+		@s.click("//a[@title='Edit User #{A.gpgname} ...']")
 		@s.click("useGPG")
 		@s.click("savebutton")
 		assert_notsigned(A)
+	end
+	def test_symChangeSig2Sig
+		setup_poll_sym
+		set_sig(true)
+		vote(A)
+		assert_signed(A)
+		@s.click("//a[@title='Edit User #{A.gpgname} ...']")
+		vote(A2)
+		assert_signed(A2)
+		assert_voteResult([A2])
 	end
 	def test_symChangeSig2Nosig
 		setup_poll_sym
@@ -222,7 +242,7 @@ class ParticipateTest  < Test::Unit::TestCase
 		vote(A)
 		assert_signed(A)
 		set_sig(false)
-		@s.click("//a[@title='Edit User #{A.name} ...']")
+		@s.click("//a[@title='Edit User #{A.gpgname} ...']")
 		@s.click("savebutton")
 		assert_notsigned(A)
 	end
