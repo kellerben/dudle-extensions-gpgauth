@@ -46,16 +46,26 @@ when "peopleSearch"
 		end
 	end
 when "getPublicKey"
+	id = $c["keyid"]
+	require "yaml"
+	keys = YAML::load_file("cached_keys.yaml") if File.exists?("cached_keys.yaml")
+	keys ||= {}
+	if keys.include?(id) && keys[id][:last_update] > Time.now-60*60*24*7
+		$body = keys[id][:key]
+	else
 	begin
-		page = Hpricot(open("http://pgp.zdv.uni-mainz.de:11371/pks/lookup?op=get&search=0x#{$c["keyid"]}"))
+		page = Hpricot(open("http://pgp.zdv.uni-mainz.de:11371/pks/lookup?op=get&search=0x#{id}"))
 		$body = page.search("//pre").inner_html.chomp.reverse.chomp.chomp.reverse
+		keys[id] = {:key => $body, :last_update => Time.now }
+		File.open("cached_keys.yaml","w"){|f| f << keys.to_yaml}
 	rescue => e
 		if e.message =~ /^500/
-			$body = "No key with keyid #{$c["keyid"]} found"
+			$body = "No key with keyid #{id} found"
 			$header["status"] = "404 NOT FOUND"
 		else
 			raise e
 		end
+	end
 	end
 end
 
