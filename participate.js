@@ -36,9 +36,9 @@ GPGAuth.getPublicKey = function (keyID, successfunc, notfoundfunc) {
 	});
 };
 
-GPGAuth.replaceName = function (name, userinput, sig, key) {
-	var pname = $("<p>" + userinput.name + "</p>"),
-	 newname = "", alt, img;
+GPGAuth.replaceName = function (userinput, sig, key) {
+	var alt, img, title;
+	userinput.before_name = userinput.before_name || "";
 	if (key) {
 		if (sig.correct) {
 			alt = _("Signed Vote");
@@ -46,42 +46,45 @@ GPGAuth.replaceName = function (name, userinput, sig, key) {
 		} else {
 			alt = _("Broken Signature");
 			img = "signed_broken";
-			newname += "<span class='warning' style='text-decoration: line-through' title='" + _("This vote was tampered!") + "'>";
+			userinput.before_name = "<span class='warning' style='text-decoration: line-through' title='" + _("This vote was tampered!") + "'>" + userinput.before_name;
 		}
+		title = printf(_("e-mail: %1, fingerprint: %2"), [key.mail, key.fingerprint]);
 	} else {
 		alt = _("Public Key was not found");
 		img = "signed_unknown";
-		key = {name: "unknown", mail: "unknown", fingerprint: "unknown"};
+		title = printf(_("Unknown Signer (key not found: %1)"), [sig.keyid]);
 	}
-	newname += "<img";
-	newname += " style='float: left'";
-	newname += " class='GPGAuthSigned'";
-	newname += " alt='" + alt + "'";
-	newname += " title='" + escapeHtml(key.name) + " " + printf(_("e-mail: %1, fingerprint: %2"), [key.mail, key.fingerprint]) + "'";
-	newname += " src='" + GPGAuth.extDir + "/img/" + img + ".png'";
-	newname += "/>";
-	newname += "<span id='" + gfHtmlID(escapeHtml(name)) + "'>" + name + "</span>";
+	userinput.before_name += "<img";
+	userinput.before_name += " style='float: left'";
+	userinput.before_name += " class='GPGAuthSigned'";
+	userinput.before_name += " alt='" + alt + "'";
+	userinput.before_name += " title='" + title + "'";
+	userinput.before_name += " src='" + GPGAuth.extDir + "/img/" + img + ".png'";
+	userinput.before_name += "/>";
 	if (!sig.correct) {
-		newname += "</span>";
+		userinput.after_name = userinput.after_name || "";
+		userinput.after_name += "</span>";
 	}
-	pname.find("#" + gfHtmlID(escapeHtml(name))).replaceWith(newname);
-	userinput.name = pname.html();
+	userinput.name = key.name;
+	userinput.id = gfHtmlID(escapeHtml(key.name));
 };
 
-Poll.parseNaddHook(function (name, userinput, returnfunc) {
+Poll.parseNaddHook(function (userinput, returnfunc) {
 	var authimage, sig;
 	if (userinput.GPGsig) {
 		sig = new SignedMessage(userinput.GPGsig); // FIXME: adopt this
 		GPGAuth.getPublicKey(sig.keyid, function (pubkey) {
-			sig.check(pubkey); //FIXME: adopt this
-			$.each(JSON.parse(sig.message), function (col, val) {
+			sig.check(pubkey.gp); //FIXME: adopt this
+			var sigmsg = JSON.parse(sig.message);
+			delete sigmsg.name;
+			$.each(sigmsg, function (col, val) {
 				userinput[col] = val;
 			});
-			GPGAuth.replaceName(name, userinput, sig, pubkey);
+			GPGAuth.replaceName(userinput, sig, pubkey);
 
 			returnfunc();
 		}, function () { 
-			GPGAuth.replaceName(name, userinput, sig);
+			GPGAuth.replaceName(userinput, sig);
 			returnfunc();
 		});
 	} else {
@@ -99,11 +102,15 @@ GPGAuth.handleUserInput = function (participantInput, submitfunc) {
 			Poll.exchangeAddParticipantRow();
 			submitfunc(participantInput);
 		};
-		var innerTr = "<td colspan='2'>";
+		var innerTr, oldname;
+		innerTr = "<td colspan='2'>";
 		innerTr += _("Please sign the following code:");
 		innerTr += "</td><td colspan='"; 
 		innerTr += Poll.columns.length;
-		innerTr += "'><textarea id='signText'>" + JSON.stringify(participantInput) + "</textarea>";
+		oldname = participantInput.oldname;
+		delete participantInput.oldname;
+		innerTr += "'><textarea rows='5' cols='40' id='signText'>" + JSON.stringify(participantInput) + "</textarea>";
+		participantInput.oldname = oldname;
 		innerTr += "</td><td><input type='button' onClick='GPGAuth.goahead()' value='";
 		innerTr += _("Save");
 		innerTr += "' />";
@@ -136,8 +143,3 @@ if (GPGAuth.enabled) {
 	});
 }
 
-//if (!Poll.submitIsBound) {
-//  Poll.submitHook(function (userinput) {
-//    alert(e);
-//  });
-//}

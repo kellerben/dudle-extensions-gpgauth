@@ -27,24 +27,3 @@ if (typeof(GPGAuth) === "undefined") {
 }
 
 
-
-
-var SignedMessage = function (sig) {
-	// FIXME: parse sig
-	this.keyid = "491a3d9c";
-	this.message = "{}";
-	this.fingerprint = "DEAD BEEF 0000 CAFE BABE  C00L D00D 0000 BAAD FEED";
-};
-
-SignedMessage.prototype.check = function (pubkey) {
-	// FIXME: check signature
-	this.correct = true; //Math.random() > 0.5;
-	return this.correct;
-};
-
-var PublicKey = function (asciikey) {
-	this.keyid = "491a3d9c";
-	this.name = "fix me " + Math.round(Math.random()*100).toString();
-	this.mail = "fix.me@example.org";
-	this.fingerprint = "DEAD BEEF 0000 CAFE BABE  C00L D00D 0000 BAAD FEED";
-};
