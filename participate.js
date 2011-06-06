@@ -48,7 +48,11 @@ GPGAuth.replaceName = function (userinput, sig, key) {
 			img = "signed_broken";
 			userinput.before_name = "<span class='warning' style='text-decoration: line-through' title='" + _("This vote was tampered!") + "'>" + userinput.before_name;
 		}
-		title = printf(_("e-mail: %1, fingerprint: %2"), [key.mail, key.fingerprint]);
+		if (key.comment === "") {
+			title = printf(_("%1, e-mail: %2, fingerprint: %3"), [userinput.name, key.mail, key.fingerprint]);
+		} else {
+			title = printf(_("%1, comment: %2, e-mail: %3, fingerprint: %4"), [userinput.name, key.comment, key.mail, key.fingerprint]);
+		}
 	} else {
 		alt = _("Public Key was not found");
 		img = "signed_unknown";
