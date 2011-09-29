@@ -19,16 +19,24 @@
 
 "use strict";
 
-if (gfHasLocalStorage) {
+var usegpg = "<div id='config_gpg'>";
+usegpg += "<h3>" + _("Security") + "</h3>";
+usegpg += "<label for='useGPG'>" + _("Sign votes using PGP/GPG:") + "</label>";
+usegpg += "<input type='checkbox' id='useGPG' />";
+usegpg += "</div";
+$("#config_user").after(usegpg);
 
-	var usegpg = "<h3>" + _("Security") + "</h3>";
-	usegpg += "<label for='useGPG'>" + _("Sign votes using PGP/GPG:") + "</label>";
-	usegpg += "<input type='checkbox' id='useGPG' />";
-	$("#config_user").after(usegpg);
-	$("#useGPG").click(function () {
+$("#useGPG").click(function () {
+	$("#config_gpg .error").remove();
+	if (gfHasLocalStorage()) {
 		localStorage.GPGAuth_enable = $("#useGPG").attr("checked");
-	});
-	$("#useGPG").attr("checked", localStorage.GPGAuth_enable === "true");
+	} else {
+		$("#config_gpg").append("<div class='error'>" + _("You need a browser, which supports DOM-Storage.") + "</div>");
+		$("#useGPG").removeAttr("checked");
+	}
+});
 
+if (gfHasLocalStorage()) {
+	$("#useGPG").attr("checked", localStorage.GPGAuth_enable === "true");
 }
 
