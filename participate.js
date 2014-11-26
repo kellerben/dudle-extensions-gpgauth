@@ -28,7 +28,7 @@ GPGAuth.getPublicKey = function (keyID, successfunc, notfoundfunc) {
 		},
 		method: "get",
 		success: function (pubKey) {
-			successfunc(new PublicKey(pubKey)); // FIXME: adopt this
+			successfunc(openpgp.key.readArmored(pubKey));
 		},
 		error: function () {
 			notfoundfunc();
@@ -40,7 +40,7 @@ GPGAuth.replaceName = function (userinput, sig, key) {
 	var alt, img, title;
 	userinput.before_name = userinput.before_name || "";
 	if (key) {
-		if (sig.correct) {
+		if (sig.verify(key.keys)[0].valid) {
 			alt = _("Signed Vote");
 			img = "signed";
 		} else {
@@ -48,15 +48,11 @@ GPGAuth.replaceName = function (userinput, sig, key) {
 			img = "signed_broken";
 			userinput.before_name = "<span class='warning' style='text-decoration: line-through' title='" + _("This vote was tampered!") + "'>" + userinput.before_name;
 		}
-		if (key.comment === "") {
-			title = printf(_("%1, e-mail: %2, fingerprint: %3"), [userinput.name, key.mail, key.fingerprint]);
-		} else {
-			title = printf(_("%1, comment: %2, e-mail: %3, fingerprint: %4"), [userinput.name, key.comment, key.mail, key.fingerprint]);
-		}
+		title = printf(_("%1, %2"), [key.keys[0].users[0].userId.userid, key.keys[0].primaryKey.fingerprint.toUpperCase().replace(/(....)/g,"$1 ").trim()]);
 	} else {
 		alt = _("Public Key was not found");
 		img = "signed_unknown";
-		title = printf(_("Unknown Signer (key not found: %1)"), [sig.keyid]);
+		title = printf(_("Unknown Signer (key not found: %1)"), [sig.getSigningKeyIds()[0].toHex().toUpperCase().replace(/(........)/g,"$1 ").trim()]);
 	}
 	userinput.before_name += "<img";
 	userinput.before_name += " style='float: left'";
@@ -65,22 +61,19 @@ GPGAuth.replaceName = function (userinput, sig, key) {
 	userinput.before_name += " title='" + title + "'";
 	userinput.before_name += " src='" + GPGAuth.extDir + "/img/" + img + ".png'";
 	userinput.before_name += "/>";
-	if (!sig.correct) {
+	if (key && !sig.verify(key.keys)[0].valid) {
 		userinput.after_name = userinput.after_name || "";
 		userinput.after_name += "</span>";
+		//userinput.id = gfHtmlID(escapeHtml(key.keys[0].users[0].userId.userid));
 	}
-	userinput.name = key.name;
-	userinput.id = gfHtmlID(escapeHtml(key.name));
 };
 
 Poll.parseNaddHook(function (userinput, returnfunc) {
 	var authimage, sig;
 	if (userinput.GPGsig) {
-		sig = new SignedMessage(userinput.GPGsig); // FIXME: adopt this
-		GPGAuth.getPublicKey(sig.keyid, function (pubkey) {
-			sig.check(pubkey.gp); //FIXME: adopt this
-			var sigmsg = JSON.parse(sig.message);
-			delete sigmsg.name;
+		sig = openpgp.cleartext.readArmored(userinput.GPGsig);
+		GPGAuth.getPublicKey(sig.getSigningKeyIds()[0].toHex(), function (pubkey) {
+			var sigmsg = JSON.parse(sig.text);
 			$.each(sigmsg, function (col, val) {
 				userinput[col] = val;
 			});

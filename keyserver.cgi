@@ -18,9 +18,8 @@
 # along with dudle.  If not, see <http://www.gnu.org/licenses/>.           #
 ############################################################################
 
-require "rubygems"
 require "open-uri"
-require "hpricot"
+require "nokogiri"
 require "cgi"
 require "json"
 $c = CGI.new
@@ -33,7 +32,7 @@ case ($c["service"])
 when "peopleSearch"
 	# FIXME: delete expired keys (op=vindex)
 	begin
-		page = Hpricot(open("http://pgp.zdv.uni-mainz.de:11371/pks/lookup?op=index&search=#{CGI.escape($c["name"])}"))
+		page = Nokogiri(open("http://pgp.zdv.uni-mainz.de:11371/pks/lookup?op=index&search=#{CGI.escape($c["name"])}"))
 		$body += page.search("//pre").collect{|a|
 			a.search("/a").collect{|e| e.inner_html }.join(" ") unless a.inner_html =~ /REVOKED/
 		}.compact.to_json
@@ -54,7 +53,7 @@ when "getPublicKey"
 		$body = keys[id][:key]
 	else
 	begin
-		page = Hpricot(open("http://pgp.zdv.uni-mainz.de:11371/pks/lookup?op=get&search=0x#{id}"))
+		page = Nokogiri(open("http://pgp.zdv.uni-mainz.de:11371/pks/lookup?op=get&search=0x#{id}"))
 		$body = page.search("//pre").inner_html.chomp.reverse.chomp.chomp.reverse
 		keys[id] = {:key => $body, :last_update => Time.now }
 		File.open("cached_keys.yaml","w"){|f| f << keys.to_yaml}

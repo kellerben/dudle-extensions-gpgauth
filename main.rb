@@ -26,12 +26,6 @@ GPGAuth.passwordStar = '#{PASSWORDSTAR}';
 SCRIPT
 )
 
-e.add_lib("BigInt")
-e.add_lib("base64")
-e.add_lib("pidcrypt")
-e.add_lib("pidcrypt_util")
-e.add_lib("sha1")
-e.add_lib("sha256")
-e.add_lib("gpg_parser")
+e.add_lib("openpgp.min")
 e.load_js
 
