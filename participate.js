@@ -96,7 +96,7 @@ Poll.parseNaddHook(function (userinput, returnfunc) {
 			//console.log("Could not parse: " + userinput.GPGsig);
 			//console.log(userinput);
 
-			console.log(err);
+			//console.log(err);
 		}
 	} else {
 		returnfunc();
