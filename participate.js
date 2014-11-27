@@ -70,24 +70,34 @@ GPGAuth.replaceName = function (userinput, sig, key) {
 Poll.parseNaddHook(function (userinput, returnfunc) {
 	var authimage, sig;
 	if (userinput.GPGsig) {
-		sig = openpgp.cleartext.readArmored(userinput.GPGsig);
-		GPGAuth.getPublicKey(sig.getSigningKeyIds()[0].toHex(), function (pubkey) {
-			var sigmsg;
-			try {
-				sigmsg = JSON.parse(sig.text);
-				$.each(sigmsg, function (col, val) {
-					userinput[col] = val;
-				});
-				GPGAuth.replaceName(userinput, sig, pubkey);
-			} catch (err) {
-				//console.log("Could not parse: " + sig.text);
-				//console.log(err);
-			}
-			returnfunc();
-		}, function () { 
-			GPGAuth.replaceName(userinput, sig);
-			returnfunc();
-		});
+		try {
+			sig = openpgp.cleartext.readArmored(userinput.GPGsig);
+			GPGAuth.getPublicKey(sig.getSigningKeyIds()[0].toHex(), function (pubkey) {
+				var sigmsg;
+				try {
+					sigmsg = JSON.parse(sig.text);
+					sigmsg.name = escapeHtml(sigmsg.name);
+					$.each(sigmsg, function (col, val) {
+						userinput[col] = val;
+					});
+					GPGAuth.replaceName(userinput, sig, pubkey);
+				} catch (err) {
+					Poll.addParticipantTR(userinput.id,printf(_("Error while parsing the vote of %1."), [escapeHtml(userinput.name)]));
+					//console.log("Could not parse: " + sig.text);
+					//console.log(err);
+				}
+				returnfunc();
+			}, function () { 
+				GPGAuth.replaceName(userinput, sig);
+				returnfunc();
+			});
+		} catch (err) {
+			Poll.addParticipantTR(userinput.id,printf(_("Error while parsing the PGP signature of %1."), [escapeHtml(userinput.name)]));
+			//console.log("Could not parse: " + userinput.GPGsig);
+			//console.log(userinput);
+
+			console.log(err);
+		}
 	} else {
 		returnfunc();
 	}
