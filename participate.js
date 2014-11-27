@@ -67,18 +67,22 @@ GPGAuth.replaceName = function (userinput, sig, key) {
 		//userinput.id = gfHtmlID(escapeHtml(key.keys[0].users[0].userId.userid));
 	}
 };
-
 Poll.parseNaddHook(function (userinput, returnfunc) {
 	var authimage, sig;
 	if (userinput.GPGsig) {
 		sig = openpgp.cleartext.readArmored(userinput.GPGsig);
 		GPGAuth.getPublicKey(sig.getSigningKeyIds()[0].toHex(), function (pubkey) {
-			var sigmsg = JSON.parse(sig.text);
-			$.each(sigmsg, function (col, val) {
-				userinput[col] = val;
-			});
-			GPGAuth.replaceName(userinput, sig, pubkey);
-
+			var sigmsg;
+			try {
+				sigmsg = JSON.parse(sig.text);
+				$.each(sigmsg, function (col, val) {
+					userinput[col] = val;
+				});
+				GPGAuth.replaceName(userinput, sig, pubkey);
+			} catch (err) {
+				//console.log("Could not parse: " + sig.text);
+				//console.log(err);
+			}
 			returnfunc();
 		}, function () { 
 			GPGAuth.replaceName(userinput, sig);
