@@ -35,7 +35,7 @@ GPGAuth.getPublicKey = function (keyID, successfunc, notfoundfunc) {
 		}
 	});
 };
-
+var s;
 GPGAuth.replaceName = function (userinput, sig, key) {
 	var alt, img, title;
 	userinput.before_name = userinput.before_name || "";
@@ -54,6 +54,8 @@ GPGAuth.replaceName = function (userinput, sig, key) {
 		img = "signed_unknown";
 		title = printf(_("Unknown Signer (key not found: %1)"), [sig.getSigningKeyIds()[0].toHex().toUpperCase().replace(/(........)/g,"$1 ").trim()]);
 	}
+	s = sig;
+	console.log(sig);
 	userinput.before_name += "<img";
 	userinput.before_name += " style='float: left'";
 	userinput.before_name += " class='GPGAuthSigned'";
@@ -140,13 +142,13 @@ if (GPGAuth.enabled) {
 			label[!GPGAuth.enabled] = $("#savebutton").val();
 			$("#savebutton").val(label[GPGAuth.enabled]);
 			$("#savebutton").after("<br /><input type='checkbox' id='useGPG' /><label for='useGPG'> " + _("Sign Vote") + "</label>");
-			$("#useGPG").live("click", function () {
+			$("#useGPG").on("click", function () {
 				GPGAuth.enabled = !GPGAuth.enabled;
 				$("#savebutton").val(label[GPGAuth.enabled]);
 				// use replaceWith instead of val() to make it resistant to form.reset
 				$("#useGPG").replaceWith("<input type='checkbox' " + (GPGAuth.enabled ? "checked='checked' " : "") + "id='useGPG' />");
 			});
-			$("#polltable form").live("reset", function(){
+			$("#polltable form").on("reset", function(){
 				$("#useGPG").replaceWith("<input type='checkbox' " + (GPGAuth.enabled ? "checked='checked' " : "") + "id='useGPG' />");
 			})
 			$("#useGPG").attr("checked", GPGAuth.enabled);

@@ -29,7 +29,7 @@ $("#config_user").after(usegpg);
 $("#useGPG").click(function () {
 	$("#config_gpg .error").remove();
 	if (gfHasLocalStorage()) {
-		localStorage.GPGAuth_enable = $("#useGPG").attr("checked");
+		localStorage.GPGAuth_enable = $("#useGPG").prop("checked");
 	} else {
 		$("#config_gpg").append("<div class='error'>" + _("You need a browser, which supports DOM-Storage.") + "</div>");
 		$("#useGPG").removeAttr("checked");
@@ -37,6 +37,6 @@ $("#useGPG").click(function () {
 });
 
 if (gfHasLocalStorage()) {
-	$("#useGPG").attr("checked", localStorage.GPGAuth_enable === "true");
+	$("#useGPG").prop("checked", localStorage.GPGAuth_enable === "true");
 }
 
