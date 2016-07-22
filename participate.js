@@ -20,17 +20,11 @@
 "use strict";
 
 GPGAuth.getPublicKey = function (keyID, successfunc, notfoundfunc) {
-	$.ajax({
-		url: GPGAuth.extDir + '/keyserver.cgi',
-		data: {
-			service: 'getPublicKey',
-			keyid: keyID
-		},
-		method: "get",
-		success: function (pubKey) {
+	var hkp = new openpgp.HKP('https://pgp.mit.edu');
+	hkp.lookup({keyId: keyID}).then(function (pubKey) {
+		if (pubKey) {
 			successfunc(openpgp.key.readArmored(pubKey));
-		},
-		error: function () {
+		} else {
 			notfoundfunc();
 		}
 	});
