@@ -108,18 +108,33 @@ GPGAuth.handleUserInput = function (participantInput, submitfunc) {
 			submitfunc(participantInput);
 		};
 		var innerTr, oldname;
-		innerTr = "<td colspan='2'>";
-		innerTr += _("Please sign the following code:");
-		innerTr += "</td><td colspan='"; 
-		innerTr += Poll.columns.length;
+		innerTr = [];
+		innerTr.push($("<td />", {
+			"colspan" : '2',
+			"text" :_("Please sign the following code:")
+		}));
+
 		oldname = participantInput.oldname;
 		delete participantInput.oldname;
-		innerTr += "'><textarea rows='5' cols='40' id='signText'>" + JSON.stringify(participantInput) + "</textarea>";
+		innerTr.push($("<td />",{
+			"colspan" : Poll.columns.length
+			})
+			.append($("<textarea />",{
+				"rows" : 5,
+				"cols" : 40,
+				"id" : 'signText',
+				"text" : JSON.stringify(participantInput)
+			}))
+		);
 		participantInput.oldname = oldname;
-		innerTr += "</td><td><input type='button' onClick='GPGAuth.goahead()' value='";
-		innerTr += _("Save");
-		innerTr += "' />";
-		innerTr += "</td>";
+
+		innerTr.push($("<td />")
+				.append($("<input />", {
+					"type" : 'button',
+					"onClick" : 'GPGAuth.goahead()',
+					"value" :_("Save")
+				}))
+		);
 		Poll.exchangeAddParticipantRow(innerTr);
 	} else {
 		submitfunc(participantInput);
