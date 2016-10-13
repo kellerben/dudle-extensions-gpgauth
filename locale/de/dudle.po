@@ -20,59 +20,76 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-06-01 10:08+0200\n"
+"POT-Creation-Date: 2016-10-14 00:18+0200\n"
 "PO-Revision-Date: \n"
-"Last-Translator: Benjamin Kellermann <Benjamin.Kellermann@tu-dresden.de>\n"
+"Last-Translator: Benjamin Kellermann\n"
 "Language-Team: \n"
-"Language: \n"
+"Language: de_DE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=iso-8859-1\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-Basepath: ../../\n"
-"X-Poedit-Language: German\n"
-"X-Poedit-Country: GERMANY\n"
+"X-Generator: Poedit 1.6.10\n"
 
-#: customize.js:24
+#: customize.js:23
 msgid "Security"
 msgstr "Sicherheit"
 
-#: customize.js:25
+#: customize.js:24
 msgid "Sign votes using PGP/GPG:"
 msgstr "Stimmen mit PGP/GPG signieren:"
 
-#: participate.js:44
+#: customize.js:34
+msgid "You need a browser, which supports DOM-Storage."
+msgstr "Sie benötigen einen Browser der den DOM-Speicher unterstützt."
+
+#: participate.js:38
 msgid "Signed Vote"
 msgstr "Signierte Stimme"
 
-#: participate.js:47
+#: participate.js:41
 msgid "Broken Signature"
 msgstr "Ungültige Signatur"
 
-#: participate.js:49
+#: participate.js:43
 msgid "This vote was tampered!"
 msgstr "Diese Stimme ist möglicherweise gefälscht!"
 
-#: participate.js:52
+#: participate.js:45
+msgid "%1, %2"
+msgstr "%1, %2"
+
+#: participate.js:47
 msgid "Public Key was not found"
 msgstr "Der öffentliche Schlüssel konnte nicht gefunden werden."
 
-#: participate.js:60
-msgid "e-mail: %1, fingerprint: %2"
-msgstr "E-Mail: %1, Fingerprint: %2"
+#: participate.js:49
+msgid "Unknown Signer (key not found: %1)"
+msgstr "Unbekannter Unterzeichner (Schlüssel %1 nicht gefunden)"
 
-#: participate.js:103
+#: participate.js:79
+msgid "Error while parsing the vote of %1."
+msgstr "Fehler beim Parsen der Stimme von %1."
+
+#: participate.js:89
+msgid "Error while parsing the PGP signature of %1."
+msgstr "Fehler beim Parsen den PGP Signatur von %1."
+
+#: participate.js:114
 msgid "Please sign the following code:"
 msgstr "Bitte signieren Sie den folgenden Text:"
 
-#: participate.js:108
+#: participate.js:135
 msgid "Save"
 msgstr "Speichern"
 
-#: participate.js:121
+#: participate.js:148
 msgid "Next"
 msgstr "Weiter"
 
-#: participate.js:124
+#: participate.js:151
 msgid "Sign Vote"
 msgstr "Signiere Stimme"
 
+#~ msgid "e-mail: %1, fingerprint: %2"
+#~ msgstr "E-Mail: %1, Fingerprint: %2"
