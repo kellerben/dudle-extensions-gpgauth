@@ -20,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-14 00:18+0200\n"
+"POT-Creation-Date: 2016-10-14 21:46+0200\n"
 "PO-Revision-Date: \n"
 "Last-Translator: Benjamin Kellermann\n"
 "Language-Team: \n"
@@ -43,53 +43,55 @@ msgstr "Stimmen mit PGP/GPG signieren:"
 msgid "You need a browser, which supports DOM-Storage."
 msgstr "Sie benötigen einen Browser der den DOM-Speicher unterstützt."
 
-#: participate.js:38
-msgid "Signed Vote"
-msgstr "Signierte Stimme"
+#: participate.js:56
+msgid "Signed Vote: %1, %2"
+msgstr "Signierte Stimme: %1, %2"
 
-#: participate.js:41
-msgid "Broken Signature"
-msgstr "Ungültige Signatur"
+#: participate.js:58
+msgid ""
+"The signature of the vote was not correct. The vote is possibly tampered!"
+msgstr ""
+"Die Signatur war nicht korrekt. Die Stimme ist möglicherweise gefälscht!"
 
-#: participate.js:43
-msgid "This vote was tampered!"
-msgstr "Diese Stimme ist möglicherweise gefälscht!"
+#: participate.js:61
+msgid "Error while parsing the vote of %1: %2"
+msgstr "Fehler beim Parsen der Stimme von %1: %2"
 
-#: participate.js:45
-msgid "%1, %2"
-msgstr "%1, %2"
-
-#: participate.js:47
-msgid "Public Key was not found"
-msgstr "Der öffentliche Schlüssel konnte nicht gefunden werden."
-
-#: participate.js:49
+#: participate.js:66
 msgid "Unknown Signer (key not found: %1)"
 msgstr "Unbekannter Unterzeichner (Schlüssel %1 nicht gefunden)"
 
-#: participate.js:79
-msgid "Error while parsing the vote of %1."
-msgstr "Fehler beim Parsen der Stimme von %1."
+#: participate.js:70
+msgid "Error while parsing the PGP signature of %1: %2"
+msgstr "Fehler beim Parsen den PGP Signatur von %1: %2"
 
-#: participate.js:89
-msgid "Error while parsing the PGP signature of %1."
-msgstr "Fehler beim Parsen den PGP Signatur von %1."
-
-#: participate.js:114
+#: participate.js:93
 msgid "Please sign the following code:"
 msgstr "Bitte signieren Sie den folgenden Text:"
 
-#: participate.js:135
+#: participate.js:114
 msgid "Save"
 msgstr "Speichern"
 
-#: participate.js:148
+#: participate.js:127
 msgid "Next"
 msgstr "Weiter"
 
-#: participate.js:151
+#: participate.js:130
 msgid "Sign Vote"
 msgstr "Signiere Stimme"
+
+#~ msgid "Broken Signature"
+#~ msgstr "Ungültige Signatur"
+
+#~ msgid "This vote was tampered!"
+#~ msgstr "Diese Stimme ist möglicherweise gefälscht!"
+
+#~ msgid "%1, %2"
+#~ msgstr "%1, %2"
+
+#~ msgid "Public Key was not found"
+#~ msgstr "Der öffentliche Schlüssel konnte nicht gefunden werden."
 
 #~ msgid "e-mail: %1, fingerprint: %2"
 #~ msgstr "E-Mail: %1, Fingerprint: %2"
