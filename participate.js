@@ -30,36 +30,14 @@ GPGAuth.getPublicKey = function (keyID, successfunc, notfoundfunc) {
 	});
 };
 
-GPGAuth.replaceName = function (userinput, sig, key) {
-	var alt, img, title;
+GPGAuth.replaceName = function (userinput, img, title) {
 	userinput.before_name = userinput.before_name || "";
-	if (key) {
-		if (sig.verify(key.keys)[0].valid) {
-			alt = _("Signed Vote");
-			img = "signed";
-		} else {
-			alt = _("Broken Signature");
-			img = "signed_broken";
-			userinput.before_name = "<span class='warning' style='text-decoration: line-through' title='" + _("This vote was tampered!") + "'>" + userinput.before_name;
-		}
-		title = printf(_("%1, %2"), [key.keys[0].users[0].userId.userid, key.keys[0].primaryKey.fingerprint.toUpperCase().replace(/(....)/g,"$1 ").trim()]);
-	} else {
-		alt = _("Public Key was not found");
-		img = "signed_unknown";
-		title = printf(_("Unknown Signer (key not found: %1)"), [sig.getSigningKeyIds()[0].toHex().toUpperCase().replace(/(........)/g,"$1 ").trim()]);
-	}
 	userinput.before_name += "<img";
 	userinput.before_name += " style='float: left'";
 	userinput.before_name += " class='GPGAuthSigned'";
-	userinput.before_name += " alt='" + alt + "'";
 	userinput.before_name += " title='" + title + "'";
 	userinput.before_name += " src='" + GPGAuth.extDir + "/img/" + img + ".png'";
 	userinput.before_name += "/>";
-	if (key && !sig.verify(key.keys)[0].valid) {
-		userinput.after_name = userinput.after_name || "";
-		userinput.after_name += "</span>";
-		//userinput.id = gfHtmlID(escapeHtml(key.keys[0].users[0].userId.userid));
-	}
 };
 Poll.parseNaddHook(function (userinput, returnfunc) {
 	var authimage, sig;
@@ -74,23 +52,24 @@ Poll.parseNaddHook(function (userinput, returnfunc) {
 					$.each(sigmsg, function (col, val) {
 						userinput[col] = val;
 					});
-					GPGAuth.replaceName(userinput, sig, pubkey);
+					if (sig.verify(pubkey.keys)[0].valid) {
+						GPGAuth.replaceName(userinput, "signed", printf(_("Signed Vote: %1, %2"), [pubkey.keys[0].users[0].userId.userid, pubkey.keys[0].primaryKey.fingerprint.toUpperCase().replace(/(....)/g,"$1 ").trim()]));
+					} else {
+						GPGAuth.replaceName(userinput, "signed_broken", _("The signature of the vote was not correct. The vote is possibly tampered!"));
+					}
 				} catch (err) {
-					Poll.addParticipantTR(userinput.id,printf(_("Error while parsing the vote of %1."), [escapeHtml(userinput.name)]));
-					//console.log("Could not parse: " + sig.text);
-					//console.log(err);
+					GPGAuth.replaceName(userinput, "signed_unknown", printf(_("Error while parsing the vote of %1: %2"), [escapeHtml(userinput.name), err]));
+					//Poll.hint(sig.text);
 				}
 				returnfunc();
-			}, function () { 
-				GPGAuth.replaceName(userinput, sig);
+			}, function () { // public key not found
+				GPGAuth.replaceName(userinput, "signed_unknown", printf(_("Unknown Signer (key not found: %1)"), [sig.getSigningKeyIds()[0].toHex().toUpperCase().replace(/(........)/g,"$1 ").trim()]));
 				returnfunc();
 			});
 		} catch (err) {
-			Poll.addParticipantTR(userinput.id,printf(_("Error while parsing the PGP signature of %1."), [escapeHtml(userinput.name)]));
-			//console.log("Could not parse: " + userinput.GPGsig);
-			//console.log(userinput);
-
-			//console.log(err);
+			GPGAuth.replaceName(userinput, "signed_unknown", printf(_("Error while parsing the PGP signature of %1: %2"), [escapeHtml(userinput.name), err]));
+			returnfunc();
+			//Poll.hint(userinput.GPGsig);
 		}
 	} else {
 		returnfunc();
